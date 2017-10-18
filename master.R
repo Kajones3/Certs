@@ -1,14 +1,23 @@
 getwd()
 
 #Let's read in the data
-jobs <- read.csv("jobs.csv", header = TRUE)
-certs <- read.csv("Certs.csv", header = TRUE)
+jobs <- read.csv("jobs.csv", header = TRUE, colClasses = c("factor",rep("character",4)))
+certs <- read.csv("Certs.csv", header = TRUE, stringsAsFactors = F)
 
 #I want to simplofy this column name
 certs$name <- certs$Assignment.Name
 
 #Let's look at the data.
-sort(table(certs$name),decreasing = TRUE)
+sort(table(certs$name), decreasing = TRUE)
+# 
+source("~/DocumentsNoCloud/repos/cmcode/Rsandbox/scripts/datamanip/startupfunctions.R")
+
+
+mycerts <- c("Net II (7 Week) 5.0 MTA OS Fundamentals - Certification Exam","Net II (5 Week) 5.0 MTA OS Fundamentals - Certification Exam","Server I MTA OS FundCert Exam","Client I (7 Week) 3.0 Client I - Certification Exam - MTA OS Fundamentals","Client I (5 Week) 3.0 Client I - MTA OS Fundamentals Certification Exam","Net II (5 Week) 4.0 Certification Exam - MTA OS Fund","Server I MTA OS FundCert Exam")
+
+mycerts[2]
+grepl("MTAOS",mycerts)
+
 summary(certs$name)
 
 #We need to take each of the certs and clean up this data a little bit.
@@ -102,5 +111,11 @@ newdata <- merge(jobs,certs,by="Student.Program.Name",all.x=TRUE)
 
 library(dplyr)
 
-trytwo <- newdata %>% group_by(Student.Program.Name)
+trytwo <- newdata %>% group_by(Student.Program.Name) %>% 
+  summarise(countrows = n(),
+            countstudents = length(unique(studentname)),
+            totalmoney = sum(money,na.rm=T)) %>% 
+  ungroup() %>% 
+  arrange(desc(totalmoney)) %>% 
+  as.data.frame()
 
